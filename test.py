@@ -1,0 +1,3 @@
+# Shift + Enter
+a=1
+print(a)
