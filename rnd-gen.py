@@ -1,7 +1,7 @@
 import numpy as np
 
-np.random.seed(408)
-np.random.randint(1, 14) # 발표조
+np.random.seed(258261505)
+np.random.randint(1, 9) # 발표조
 # np.random.randint(1, 4)  # 발표자
 # np.random.permutation(9)+1
 
