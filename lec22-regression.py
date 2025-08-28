@@ -201,6 +201,54 @@ from statsmodels.formula.api import ols
 model1 = ols("bill_length_mm ~ bill_depth_mm", data=train_data).fit()
 model1.params
 
+print(model1.summary())
+
+R^2 = 0.062
+데이터 전체 변동성의 약 6.2%를 회귀 모델이 설명하고 있다. 
+
+model1.params
+bill_depth_mm 계수: -0.706191
+부리깊이가 1mm 증가하면, 부리길이는 평균적으로
+0.7mm 감소하는 경향을 보인다.
+
+residuals = model1.resid
+fitted_values = model1.fittedvalues
+plt.figure(figsize=(15,4))
+plt.subplot(1,2,1)
+plt.scatter(fitted_values, residuals);
+plt.subplot(1,2,2)
+stats.probplot(residuals, plot=plt);
+plt.show()
+
+
+model2 = ols(
+    "bill_length_mm ~ bill_depth_mm + C(species)", 
+    data=train_data).fit()
+model2.params
+
+print(model2.summary())
+
+import statsmodels.api as sm
+table = sm.stats.anova_lm(model1, model2) #anova
+print(table)
+
+residuals = model2.resid
+fitted_values = model2.fittedvalues
+plt.figure(figsize=(15,4))
+plt.subplot(1,2,1)
+plt.scatter(fitted_values, residuals);
+plt.subplot(1,2,2)
+stats.probplot(residuals, plot=plt);
+plt.show()
+
+import scipy.stats as stats
+
+x=train_data["bill_depth_mm"]
+y=train_data["bill_length_mm"]
+corr_coeff, p_value = stats.pearsonr(x, y)
+
+
+
 sns.scatterplot(data=train_data,
                 x='bill_depth_mm', y='bill_length_mm',
                 edgecolor='w', s=50)
@@ -212,6 +260,42 @@ plt.plot(x_values, y_values,
          color='red', label='Regression Line')
 plt.grid(True)
 plt.legend()
+plt.show()
+
+# ===== 주어진 회귀계수 (model2.params) =====
+base_intercept = 14.577564
+beta_depth = 1.320354
+species_effect = {
+    "Chinstrap": 9.886486,
+    "Gentoo": 12.912783,
+    # 기준범주(Baseline)는 효과 0.0 (예: Adelie)
+}
+
+# ===== 산점도: 종별 색상 =====
+plt.figure(figsize=(7,5))
+palette = dict(zip(train_data["species"].unique(), sns.color_palette("Set2", n_colors=train_data["species"].nunique())))
+sns.scatterplot(
+    data=train_data,
+    x="bill_depth_mm", y="bill_length_mm",
+    hue="species", palette=palette,
+    edgecolor="w", s=50
+)
+
+# ===== 종별 회귀직선 =====
+x_grid = np.linspace(train_data["bill_depth_mm"].min(), train_data["bill_depth_mm"].max(), 100)
+
+for sp in sorted(train_data["species"].unique()):
+    intercept_sp = base_intercept + species_effect.get(sp, 0.0)
+    y_hat = intercept_sp + beta_depth * x_grid
+    plt.plot(x_grid, y_hat, label=f"{sp} 회귀선", color=palette[sp], linewidth=2)
+
+# ===== 플롯 꾸미기 =====
+plt.xlabel("bill_depth_mm")
+plt.ylabel("bill_length_mm")
+plt.title("종별 산점도와 회귀직선 (OLS: bill_length_mm ~ bill_depth_mm + C(species))")
+plt.grid(True, alpha=0.3)
+plt.legend()
+plt.tight_layout()
 plt.show()
 
 # 3) 계수 유의성을 통해 해석가능성을
@@ -321,3 +405,52 @@ print("최소 SSR =", res.fun)
 a=np.linalg.inv(X.transpose() @ X)
 b=X.transpose() @ y
 a @ b
+
+
+
+from sklearn.datasets import fetch_california_housing
+import pandas as pd
+import statsmodels.formula.api as smf
+cal = fetch_california_housing(as_frame=True)
+df = cal.frame
+model = smf.ols('MedHouseVal ~ AveRooms + AveOccup', data=df).fit()
+print(model.summary())
+
+
+df['IncomeLevel'] = pd.qcut(df['MedInc'], q=3, labels=['Low', 'Mid', 'High'])
+model2 = smf.ols('MedHouseVal ~ AveRooms + AveOccup + C(IncomeLevel)', data=df).fit()
+print(model2.summary())
+
+
+
+
+from sklearn.datasets import load_diabetes
+# 데이터 불러오기 및 DataFrame 변환
+diabetes = load_diabetes(as_frame=True)
+df2 = diabetes.frame
+df2.info()
+
+model = smf.ols('target ~ s1',
+                data=df2).fit()
+model.aic
+print(model.summary())
+4879
+4895
+print(model2.summary())
+4878.
+4899
+model.rsquared_adj
+
+ci_df=model.conf_int()
+ci_df.iloc[1,:]
+
+
+model2 = smf.ols('target ~ bmi + bp + s1 + s2',
+                data=df2).fit()
+print(model2.summary())
+model2.fvalue
+
+
+table = sm.stats.anova_lm(model, model2) 
+table
+
