@@ -22,9 +22,46 @@ iris.info()
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
-model = smf.ols("Petal_Length ~ Petal_Width + Sepal_Length",
-                data = iris).fit()
+model = smf.ols(
+    "Petal_Length ~ Petal_Width + C(Species)",
+    data = iris).fit()
 print(model.summary())
+model.params
+# 예측용 데이터프레임 만들기
+new_data = pd.DataFrame({
+    "Petal_Width": [0.5],
+    "Species": ["virginica"]   # Species 범주 변수 (0=setosa, 1=versicolor, 2=virginica)
+})
+
+# 예측
+predictions = model.predict(new_data)
+predictions
+
+import scipy.stats as stats
+residuals = model.resid
+fitted_values = model.fittedvalues
+plt.figure(figsize=(15,4))
+plt.subplot(1,2,1)
+plt.scatter(fitted_values, residuals);
+plt.subplot(1,2,2)
+stats.probplot(residuals, plot=plt);
+plt.show()
+
+
+sm.stats.anova_lm(model)
+
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+
+model1 = ols('Petal_Length ~ Petal_Width', data=iris).fit() #mod1
+model2 = ols('Petal_Length ~ Petal_Width + Sepal_Length + Sepal_Width',
+data=iris).fit() #mod2
+
+table = sm.stats.anova_lm(model1, model2) #anova
+print(table)
+
+
+
 
 coefficients=model.params[1:]
 coefficients.idxmax()
