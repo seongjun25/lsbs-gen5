@@ -19,13 +19,16 @@ train_df = train_df.select_dtypes(
     )
 
 # NA 처리
+# drop na말고 다른 값으로 채울 수 있는 칼럼 없어?
 train_df=train_df.dropna()
 
 from sklearn.linear_model import LinearRegression
 model = LinearRegression()
 
+# 의미없는 변수들을 빼면 어떨까?
+# 
 # x와 y 설정
-train_X = train_df.drop("SalePrice", axis=1)
+train_X = train_df.drop(["Id", "SalePrice"], axis=1)
 train_y = train_df["SalePrice"]
 
 # 모델 학습
@@ -39,8 +42,11 @@ test_df = test_df.select_dtypes(
     )
 
 # 모든 NA 값을 0으로 채움
+# NA말고 다른 값으로 채울 수 있는 칼럼없어?
 test_df=test_df.fillna(0)
 
+# import numpy as np
+# model.intercept_ + np.sum(model.coef_ * test_df.iloc[0,:])
 result=model.predict(test_df)
 result
 
