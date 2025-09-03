@@ -34,8 +34,9 @@ train_df_all = pd.concat([train_df_cat,
                           train_df_num], axis = 1)
 
 # 독립변수(X)와 종속변수(y) 분리
+# np.log(y_train).hist()
 X_train = train_df_all
-y_train = train_df['SalePrice']
+y_train = np.log1p(train_df['SalePrice'])
 
 from sklearn.linear_model import ElasticNet
 import numpy as np
@@ -85,7 +86,7 @@ test_df_all = pd.concat([test_df_cat,
 # y_pred = elastic.predict(test_df)
 y_pred = elastic_search.predict(test_df_all)
 submit = pd.read_csv('./data/houseprice/sample_submission.csv')
-submit["SalePrice"]=y_pred
+submit["SalePrice"]=np.expm1(y_pred)
 
 # CSV로 저장
 submit.to_csv('./data/houseprice/elasticnet_grid.csv', index=False)
