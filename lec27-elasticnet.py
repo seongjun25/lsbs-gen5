@@ -7,6 +7,7 @@ test_df = pd.read_csv('./data/houseprice/test.csv')
 # train_df = train_df.select_dtypes(include=['number'])
 
 num_columns = train_df.select_dtypes(include=['number']).columns
+num_columns = num_columns.drop("SalePrice")
 cat_columns = train_df.select_dtypes(include=['object']).columns
 
 # 결측치 채우기 (간단히 처리)
@@ -17,6 +18,7 @@ mean_impute = SimpleImputer(strategy='mean')
 
 train_df[cat_columns] = freq_impute.fit_transform(train_df[cat_columns])
 train_df[num_columns] = mean_impute.fit_transform(train_df[num_columns])
+# freq_impute.statistics_
 
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
@@ -32,7 +34,7 @@ train_df_all = pd.concat([train_df_cat,
                           train_df_num], axis = 1)
 
 # 독립변수(X)와 종속변수(y) 분리
-X_train = train_df_all.drop(columns='SalePrice')
+X_train = train_df_all
 y_train = train_df['SalePrice']
 
 from sklearn.linear_model import ElasticNet
@@ -70,14 +72,20 @@ print(-elastic_search.best_score_)
 # elastic.coef_
 
 # 테스트 데이터도 숫자형만 선택하고, 결측치는 평균으로 채움
-test_df = test_df.select_dtypes(include=['number'])
-test_df = test_df.fillna(train_df.mean())
+test_df[cat_columns] = freq_impute.transform(test_df[cat_columns])
+test_df[num_columns] = mean_impute.transform(test_df[num_columns])
+
+test_df_cat = onehot.transform(test_df[cat_columns])
+test_df_num = std_scaler.transform(test_df[num_columns])
+
+test_df_all = pd.concat([test_df_cat,
+                         test_df_num], axis = 1)
 
 # 예측
 # y_pred = elastic.predict(test_df)
-y_pred = elastic_search.predict(test_df)
+y_pred = elastic_search.predict(test_df_all)
 submit = pd.read_csv('./data/houseprice/sample_submission.csv')
 submit["SalePrice"]=y_pred
 
 # CSV로 저장
-submit.to_csv('./data/houseprice/elasticnet.csv', index=False)
+submit.to_csv('./data/houseprice/elasticnet_grid.csv', index=False)
