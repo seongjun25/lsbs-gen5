@@ -20,7 +20,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
-i=15   # i = 1에서 변동시키면서 MSE 체크 할 것
+i=1   # i = 1에서 변동시키면서 MSE 체크 할 것
 k = np.linspace(0, 1, 100)
 sin_k = np.sin(2 * np.pi * k)
 poly1 = PolynomialFeatures(degree=i, include_bias=True)
@@ -72,7 +72,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
 # 고정된 설정
-i = 1  # 다항식 차수
+i = 10  # 다항식 차수
 k = np.linspace(0, 1, 200)
 sin_k = np.sin(2 * np.pi * k)
 
