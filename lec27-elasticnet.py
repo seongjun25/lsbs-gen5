@@ -23,7 +23,8 @@ train_df[num_columns] = mean_impute.fit_transform(train_df[num_columns])
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-onehot = OneHotEncoder(handle_unknown='ignore', 
+onehot = OneHotEncoder(handle_unknown='ignore',
+                        
                        sparse_output=False).set_output(transform="pandas")
 std_scaler = StandardScaler().set_output(transform="pandas")
 

@@ -1,69 +1,24 @@
+# 분산 편향 트레이드 오프
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 # train 셋
-np.random.seed(2021)
+# np.random.seed(2021)
 x = np.random.choice(np.arange(0, 1.05, 0.05), size=40, replace=True)
 y = np.sin(2 * np.pi * x) + np.random.normal(0, 0.2, len(x))
 data_for_learning = pd.DataFrame({'x': x, 'y': y})
-
-# 산점도
-plt.figure(figsize=(8, 5))
-plt.scatter(data_for_learning["x"], data_for_learning["y"], 
-            color="blue", alpha=0.7, label="Training data")
-plt.show()
-
-from sklearn.linear_model import LinearRegression
-lr = LinearRegression()
-
-lr.fit(data_for_learning[["x"]], 
-       data_for_learning["y"])
-lr.coef_
-lr.intercept_
-
-
-data_for_learning["x^2"] = data_for_learning["x"]**2
-data_for_learning["x^3"] = data_for_learning["x"]**3
-data_for_learning.head()
-
-tr_X = data_for_learning.drop(columns="y")
-tr_y = data_for_learning["y"]
-lr.fit(tr_X, tr_y)
-lr.coef_
-lr.intercept_
-
-# 회귀직선식은 어떻게 되나요?
-# y_hat = 0.929 - 2.03 * X1 + 0.352 * X2
-# y_hat = 0.929 - 2.03 * X + 0.352 * X^2
-
-# 회귀직선식을 시각화 해보면?
-y_hat = lr.predict(tr_X)
-
-# 산점도
-plt.figure(figsize=(8, 5))
-plt.scatter(data_for_learning["x"], 
-            data_for_learning["y"], 
-            color="blue", alpha=0.7, label="Training data")
-
-# 두 번째 산점도 겹치기
-plt.scatter(tr_X["x"], y_hat, 
-            color="red", alpha=0.7, label="regression line")
-
-plt.show()
-
+data_for_learning
 
 # train 셋 나누기 -> train, valid
 from sklearn.model_selection import train_test_split
 train, valid = train_test_split(data_for_learning, test_size=0.3, random_state=1234)
-# print(train.shape)
-# print(valid.shape)
 
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
-i=1   # i = 1에서 변동시키면서 MSE 체크 할 것
+i=15   # i = 1에서 변동시키면서 MSE 체크 할 것
 k = np.linspace(0, 1, 100)
 sin_k = np.sin(2 * np.pi * k)
 poly1 = PolynomialFeatures(degree=i, include_bias=True)
@@ -103,7 +58,63 @@ axes[1].grid(True)
 plt.tight_layout()
 plt.show()
 
-# 집값 데이터에서 위 모델을 어떻게 적용할 것인가?
-# X1, X2, ... , X20, ... , X38
 
+# 분산-편향 트레이드 오프: 여러 번 학습한 모델 겹쳐 그리기
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+# 고정된 설정
+i = 1  # 다항식 차수
+k = np.linspace(0, 1, 200)
+sin_k = np.sin(2 * np.pi * k)
+
+# 반복 횟수 (모델 학습을 여러 번 수행)
+n_repeat = 100
+model_lines = []
+
+for seed in range(n_repeat):
+    # 매번 다른 train/valid 셋 샘플링
+    x = np.random.choice(np.arange(0, 1.05, 0.05), size=40, replace=True)
+    y = np.sin(2 * np.pi * x) + np.random.normal(0, 0.2, len(x))
+    data_for_learning = pd.DataFrame({'x': x, 'y': y})
+
+    train, valid = train_test_split(data_for_learning, test_size=0.3, random_state=seed)
+
+    # 다항식 피처 변환 및 회귀
+    poly = PolynomialFeatures(degree=i, include_bias=True)
+    train_X = poly.fit_transform(train[['x']])
+    model = LinearRegression().fit(train_X, train['y'])
+
+    # 예측 직선 저장
+    model_line = model.predict(poly.transform(k.reshape(-1, 1)))
+    model_lines.append(model_line)
+
+# 시각화
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+# 왼쪽: 학습 데이터 + 여러 파란 직선
+axes[0].set_title(f'{i}-degree Polynomial Regression (Train)')
+for line in model_lines:
+    axes[0].plot(k, line, color='blue', alpha=0.2)  # 반투명하게
+axes[0].plot(k, sin_k, color='red', lw=2, label='True Curve')
+axes[0].set_ylim((-2.0, 2.0))
+axes[0].legend()
+axes[0].grid(True)
+
+# 오른쪽: 검증 데이터 + 여러 파란 직선
+axes[1].set_title(f'{i}-degree Polynomial Regression (Valid)')
+for line in model_lines:
+    axes[1].plot(k, line, color='blue', alpha=0.2)  # 반투명하게
+axes[1].plot(k, sin_k, color='red', lw=2, label='True Curve')
+axes[1].set_ylim((-2.0, 2.0))
+axes[1].legend()
+axes[1].grid(True)
+
+plt.tight_layout()
+plt.show()
