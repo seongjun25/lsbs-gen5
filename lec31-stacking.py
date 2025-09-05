@@ -121,10 +121,33 @@ y_pred3 = knn_search.predict(test_df_all)
 y_pred = (y_pred1 + y_pred2 + y_pred3) / 3
 
 # 스택킹: 새로운 모델(메타모델)을 사용해서 합침(선형회귀)
+from sklearn.linear_model import LinearRegression
 
+lr = LinearRegression(fit_intercept = False)
+y_pred_el = elastic_search.predict(train_df_all)
+y_pred_dct = dct_search.predict(train_df_all)
+y_pred_knn = knn_search.predict(train_df_all)
+X_meta = pd.DataFrame({
+             "elastic": y_pred_el,
+             "dct": y_pred_dct,
+             "knn": y_pred_knn,
+         })
+lr.fit(X_meta, y_train)
+lr.coef_
+lr.intercept_
+
+y_pred1 = elastic_search.predict(test_df_all)
+y_pred2 = dct_search.predict(test_df_all)
+y_pred3 = knn_search.predict(test_df_all)
+X_meta_test = pd.DataFrame({
+             "elastic": y_pred1,
+             "dct": y_pred2,
+             "knn": y_pred3,
+         })
+y_pred = lr.predict(X_meta_test)
 
 submit = pd.read_csv('./data/houseprice/sample_submission.csv')
 submit["SalePrice"]=np.expm1(y_pred)
 
 # CSV로 저장
-submit.to_csv('./data/houseprice/elasticnet_grid.csv', index=False)
+submit.to_csv('./data/houseprice/stacking.csv', index=False)
