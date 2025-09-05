@@ -146,6 +146,30 @@ X_meta_test = pd.DataFrame({
          })
 y_pred = lr.predict(X_meta_test)
 
+# =========================
+# 기본 모델 정의 (디시전 트리와 라쏘)
+base_models = [
+    ('decision_tree', DecisionTreeRegressor()),
+    ('lasso', Lasso())
+]
+
+# 메타 모델 정의 (선형 회귀)
+meta_model = LinearRegression()
+
+# 스태킹 리그레서 설정
+stacking_regressor = StackingRegressor(
+    estimators=base_models,
+    final_estimator=meta_model,
+    cv=5  # 크로스밸리데이션 폴드 수
+)
+
+# 모델 학습
+stacking_regressor.fit(X_train, y_train)
+
+# 테스트 세트로 예측
+predictions = stacking_regressor.predict(X_test)
+
+
 submit = pd.read_csv('./data/houseprice/sample_submission.csv')
 submit["SalePrice"]=np.expm1(y_pred)
 
