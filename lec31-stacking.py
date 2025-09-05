@@ -149,14 +149,17 @@ y_pred = lr.predict(X_meta_test)
 # =========================
 # 기본 모델 정의 (디시전 트리와 라쏘)
 base_models = [
-    ('decision_tree', DecisionTreeRegressor()),
-    ('lasso', Lasso())
+    ('elastic', ElasticNet(alpha=0.1, l1_ratio=0)),
+    ('decision_tree', DecisionTreeRegressor(ccp_alpha=0, 
+                                            max_depth=6)),
+    ('knn', KNeighborsRegressor(n_neighbors=5))
 ]
 
 # 메타 모델 정의 (선형 회귀)
 meta_model = LinearRegression()
 
 # 스태킹 리그레서 설정
+from sklearn.ensemble import StackingRegressor
 stacking_regressor = StackingRegressor(
     estimators=base_models,
     final_estimator=meta_model,
@@ -167,7 +170,7 @@ stacking_regressor = StackingRegressor(
 stacking_regressor.fit(X_train, y_train)
 
 # 테스트 세트로 예측
-predictions = stacking_regressor.predict(X_test)
+y_pred = stacking_regressor.predict(test_df_all)
 
 
 submit = pd.read_csv('./data/houseprice/sample_submission.csv')
