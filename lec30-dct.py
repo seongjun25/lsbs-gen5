@@ -17,11 +17,28 @@ plt.show()
 
 from sklearn.tree import DecisionTreeRegressor
 
-dct = DecisionTreeRegressor(max_depth=10)
+dct = DecisionTreeRegressor()
 dct.get_params()
 
-dct.fit(x, y)
-pred_y=dct.predict(x)
+import numpy as np
+dct_params = {'max_depth' : np.arange(1, 7),
+              'ccp_alpha': np.linspace(0, 1, 10)}
+
+# 교차검증
+from sklearn.model_selection import KFold, GridSearchCV
+cv = KFold(n_splits=5, 
+           shuffle=True, 
+           random_state=2025)
+
+# 그리드서치
+dct_search = GridSearchCV(estimator=dct, 
+                          param_grid=dct_params, 
+                          cv = cv, 
+                          scoring='neg_mean_squared_error')
+dct_search.fit(x, y)
+# dct.fit(x, y)
+dct_search.best_params_
+pred_y=dct_search.predict(x)
 
 plt.figure(figsize=(6,4))
 plt.scatter(x, y, alpha=0.6, color="blue", edgecolor="k")
@@ -54,3 +71,6 @@ cal_benefit(41.6)
 cal_benefit(38)
 cal_benefit(45)
 cal_benefit(46)
+
+
+
