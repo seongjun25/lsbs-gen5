@@ -147,12 +147,11 @@ X_meta_test = pd.DataFrame({
 y_pred = lr.predict(X_meta_test)
 
 # =========================
-# 기본 모델 정의 (디시전 트리와 라쏘)
+# 기본 모델 정의 (앞에서 찾은 최적 모델)
 base_models = [
-    ('elastic', ElasticNet(alpha=0.1, l1_ratio=0)),
-    ('decision_tree', DecisionTreeRegressor(ccp_alpha=0, 
-                                            max_depth=6)),
-    ('knn', KNeighborsRegressor(n_neighbors=5))
+    ('elastic', elastic_search.best_estimator_),
+    ('decision_tree', dct_search.best_estimator_),
+    ('knn', knn_search.best_estimator_)
 ]
 
 # 메타 모델 정의 (선형 회귀)
@@ -163,15 +162,14 @@ from sklearn.ensemble import StackingRegressor
 stacking_regressor = StackingRegressor(
     estimators=base_models,
     final_estimator=meta_model,
-    cv=5  # 크로스밸리데이션 폴드 수
+    cv=cv
 )
 
 # 모델 학습
 stacking_regressor.fit(X_train, y_train)
-
+stacking_regressor.estimators_
 # 테스트 세트로 예측
 y_pred = stacking_regressor.predict(test_df_all)
-
 
 submit = pd.read_csv('./data/houseprice/sample_submission.csv')
 submit["SalePrice"]=np.expm1(y_pred)
