@@ -72,4 +72,47 @@ np.sum(lower_y == "Gentoo") # 111
 1 - ((111/112)**2 + (1/112)**2)
 
 # mean GI: 0.087
-0.4628 - 0.087
+# 0.4628 - 0.087
+
+from sklearn.tree import DecisionTreeClassifier
+
+dct = DecisionTreeClassifier(criterion='gini')
+dct.get_params()
+
+import numpy as np
+dct_params = {'max_depth' : np.arange(1, 8),
+              'ccp_alpha': np.linspace(0, 1, 5)}
+
+# 교차검증
+from sklearn.model_selection import KFold, GridSearchCV
+cv = KFold(n_splits=5, 
+           shuffle=True, 
+           random_state=2025)
+
+# 그리드서치
+dct_search = GridSearchCV(estimator=dct, 
+                          param_grid=dct_params, 
+                          cv = cv, 
+                          scoring='accuracy')
+dct_search.fit(x, y)
+dct_search.best_params_
+
+dct_search.predict(x)
+dct_search.predict_proba(x)
+
+from sklearn import tree
+import matplotlib.pyplot as plt
+
+# 최적 모델 꺼내오기
+best_tree = dct_search.best_estimator_
+
+plt.figure(figsize=(14,7))
+tree.plot_tree(
+    best_tree,
+    feature_names=["bill_length_mm", "bill_depth_mm"],  # 입력 변수 이름
+    class_names=best_tree.classes_,                     # 클래스 이름
+    filled=True, rounded=True
+)
+plt.show()
+
+
