@@ -7,12 +7,13 @@ train_df.columns
 test_df.columns
 # train_df = train_df.select_dtypes(include=['number'])
 
+# 각 칼럼별 결측치 몇개가 있을까?
+train_df.isna().sum(axis=0)
+
 num_columns = train_df.select_dtypes(include=['number']).columns
 num_columns = num_columns.drop("Survived")
 cat_columns = train_df.select_dtypes(include=['object']).columns
-
-# 각 칼럼별 결측치 몇개가 있을까?
-train_df.isna().sum(axis=0)
+cat_columns = cat_columns.drop(["Name", "Ticket", "Cabin"])
 
 # 결측치 채우기 (간단히 처리)
 from sklearn.impute import SimpleImputer
@@ -41,7 +42,31 @@ train_df_num = std_scaler.fit_transform(train_df[num_columns])
 train_df_all = pd.concat([train_df_cat,
                           train_df_num], axis = 1)
 
+train_df_all
+
 # 독립변수(X)와 종속변수(y) 분리
 # np.log(y_train).hist()
 X_train = train_df_all
-y_train = np.log1p(train_df['SalePrice'])
+y_train = train_df["Survived"]
+
+from sklearn.tree import DecisionTreeClassifier
+
+dct = DecisionTreeClassifier(criterion='gini')
+dct.get_params()
+
+import numpy as np
+dct_params = {'max_depth' : np.arange(1, 8),
+              'ccp_alpha': np.linspace(0, 1, 5)}
+
+# 교차검증
+from sklearn.model_selection import KFold, GridSearchCV
+cv = KFold(n_splits=5, 
+           shuffle=True, 
+           random_state=2025)
+
+# 그리드서치
+dct_search = GridSearchCV(estimator=dct, 
+                          param_grid=dct_params, 
+                          cv = cv, 
+                          scoring='accuracy')
+dct_search.fit(X_train, y_train)
