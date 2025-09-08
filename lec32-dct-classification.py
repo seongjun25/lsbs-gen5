@@ -48,6 +48,28 @@ right_y = y.loc[x["bill_length_mm"] > 50]
 # 1 - (p_g^2 + p_c^2)
 # 1 - (0.5**2 + 0.5**2)
 
-bill_depth 16.5 기준으로
-지니 인덱스 구해보세요!
+# bill_depth 16.5 기준으로
+# 지니 인덱스 구해보세요!
 
+import numpy as np
+np.sum(y == "Gentoo")
+len(y)
+# 나누기 전 GI
+1 - ((119/187)**2 + (68/187)**2)
+
+# 윗 상자
+upper_y=y[x["bill_depth_mm"] >= 16.5]
+len(upper_y) # 75
+np.sum(upper_y == "Gentoo") # 8
+# GI: 0.1906
+1 - ((8/75)**2 + (67/75)**2)
+
+# 아래 상자
+lower_y=y[x["bill_depth_mm"] < 16.5]
+len(lower_y) # 112
+np.sum(lower_y == "Gentoo") # 111
+# GI: 0.0177
+1 - ((111/112)**2 + (1/112)**2)
+
+# mean GI: 0.087
+0.4628 - 0.087
