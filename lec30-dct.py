@@ -21,8 +21,8 @@ dct = DecisionTreeRegressor()
 dct.get_params()
 
 import numpy as np
-dct_params = {'max_depth' : np.arange(1, 7),
-              'ccp_alpha': np.linspace(0, 1, 10)}
+dct_params = {'max_depth' : [1],
+              'ccp_alpha': [0]}
 
 # 교차검증
 from sklearn.model_selection import KFold, GridSearchCV
@@ -50,7 +50,7 @@ plt.show()
 import numpy as np
 mse_1=np.mean((y - y.mean())**2)
 
-num=30
+num=41.6
 def cal_benefit(num):
     # 41.6을 기준으로 나눈 모델의 MSE
     idx_416 = x["bill_length_mm"] < num
@@ -68,9 +68,21 @@ def cal_benefit(num):
     return (mse_1 - mse_2)
 
 cal_benefit(41.6)
+cal_benefit(42)
 cal_benefit(38)
 cal_benefit(45)
 cal_benefit(46)
 
 
+from sklearn import tree
+import matplotlib.pyplot as plt
 
+# GridSearchCV에서 최적 모델 꺼내기
+best_tree = dct_search.best_estimator_
+
+plt.figure(figsize=(12,6))
+tree.plot_tree(best_tree,
+               feature_names=["bill_length_mm"],
+               filled=True,       # 색깔로 값 표시
+               rounded=True)      # 둥근 박스
+plt.show()
