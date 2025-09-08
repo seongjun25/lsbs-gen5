@@ -70,3 +70,24 @@ dct_search = GridSearchCV(estimator=dct,
                           cv = cv, 
                           scoring='accuracy')
 dct_search.fit(X_train, y_train)
+dct_search.best_params_
+
+# 테스트 데이터 채우기
+test_df[cat_columns] = freq_impute.transform(test_df[cat_columns])
+test_df[num_columns] = mean_impute.transform(test_df[num_columns])
+
+# 표준화 및 인코딩
+test_df_cat = onehot.transform(test_df[cat_columns])
+test_df_num = std_scaler.transform(test_df[num_columns])
+
+test_df_all = pd.concat([test_df_cat,
+                         test_df_num], axis = 1)
+test_df_all
+
+y_pred=dct_search.predict(test_df_all)
+
+submit = pd.read_csv('./data/titanic/gender_submission.csv')
+submit["Survived"]=y_pred
+
+# CSV로 저장
+submit.to_csv('./data/titanic/base-model.csv', index=False)
