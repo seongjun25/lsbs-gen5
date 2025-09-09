@@ -46,14 +46,14 @@ y_train = np.log1p(train_df['SalePrice'])
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 
-rf = RandomForestRegressor()
+rf = RandomForestRegressor(oob_score=True)
 RandomForestRegressor().get_params()
 rf_grid = {
-    "n_estimators": [200, 500, 800],
-    "max_depth": [None, 5, 10, 15],
-    "max_features": ["sqrt", 0.4, 0.6]
-    # "min_samples_split": [2, 5, 10],
-    # "min_samples_leaf": [1, 2, 4],
+    "n_estimators": [300],
+    "min_samples_leaf": [1, 2, 4, 8],
+    "max_features": [0.3, 0.5, 0.7],
+    "min_samples_split": [2, 5, 10, 20],
+    "max_leaf_nodes": [None, 64, 128, 256, 512],
 }
 
 # 교차검증
@@ -75,7 +75,7 @@ pd.DataFrame(rf_search.cv_results_)
 print(rf_search.best_params_)
 
 print(-rf_search.best_score_)
-
+rf_search.best_estimator_.oob_score_
 # elastic = ElasticNet(alpha=0.1, 
 #                      l1_ratio=0.75)
 # elastic.fit(X_train, y_train)
