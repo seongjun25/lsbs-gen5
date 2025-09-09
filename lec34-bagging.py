@@ -1,3 +1,4 @@
+# 부트스트랩 예제 코드
 import numpy as np
 
 # 원 데이터
