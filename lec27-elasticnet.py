@@ -69,7 +69,8 @@ pd.DataFrame(elastic_search.cv_results_)
 
 # best prameter
 print(elastic_search.best_params_)
-
+my_best_model=elastic_search.best_estimator_
+my_best_model.coef_
 print(-elastic_search.best_score_)
 
 # elastic = ElasticNet(alpha=0.1, 
