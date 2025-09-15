@@ -24,4 +24,30 @@ from palmerpenguins import load_penguins
 penguins = load_penguins()
 penguins.info()
 penguins = penguins.dropna()
+df=penguins[["bill_length_mm", "bill_depth_mm"]]
+
+from sklearn.preprocessing import StandardScaler
+numeric_data = df.select_dtypes('number')
+stdscaler = StandardScaler()
+df_trans = pd.DataFrame(stdscaler.fit_transform(numeric_data), 
+                        columns = numeric_data.columns)
+print(df_trans.head(2))
+
+from sklearn.cluster import KMeans # K-평균 군집분석 불러오기
+kmeans = KMeans(n_clusters = 3, 
+                random_state = 1)
+labels = kmeans.fit_predict(df_trans)
+print(labels)
+
+penguins["labels"] = labels
 penguins
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.scatterplot(data=penguins,
+                x='bill_depth_mm', y='bill_length_mm',
+                hue='labels', palette='deep',
+                edgecolor='w', s=50)
+
+
