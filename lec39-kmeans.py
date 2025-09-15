@@ -50,4 +50,64 @@ sns.scatterplot(data=penguins,
                 hue='labels', palette='deep',
                 edgecolor='w', s=50)
 
+sns.scatterplot(data=penguins,
+                x='bill_depth_mm', y='bill_length_mm',
+                hue='species', palette='deep',
+                edgecolor='w', s=50)
 
+
+
+# k-means
+import numpy as np
+
+x1 = np.array([2, 2, 3, 5, 6, 6])
+x2 = np.array([2, 4, 3, 5, 4, 5])
+
+# 1) 랜덤하게 그룹의 중심을 선택함.
+gr_1 = np.array([3, 6], dtype=float)
+gr_2 = np.array([5, 2], dtype=float)
+
+
+# 2) 각 데이터 포인트에서 각 그룹 중심까지 거리 계산
+# gr_1까지 거리
+gr_1_dist=np.sqrt((x1 - gr_1[0])**2 + (x2 - gr_1[1])**2)
+gr_1_dist
+
+# gr_2까지 거리
+gr_2_dist=np.sqrt((x1 - gr_2[0])**2 + (x2 - gr_2[1])**2)
+gr_2_dist
+
+# 그룹 할당
+labels = (gr_1_dist > gr_2_dist) + 1
+
+# 3) 그룹 중심점 업데이트
+# gr_1 중심점 업데이트
+gr_1[0] = x1[labels == 1].mean()
+gr_1[1] = x2[labels == 1].mean()
+
+# gr_2 중심점 업데이트
+gr_2[0] = x1[labels == 2].mean()
+gr_2[1] = x2[labels == 2].mean()
+
+# 4) 2, 3번 반복
+
+# 2) 각 데이터 포인트에서 각 그룹 중심까지 거리 계산
+# gr_1까지 거리
+gr_1_dist=np.sqrt((x1 - gr_1[0])**2 + (x2 - gr_1[1])**2)
+gr_1_dist
+
+# gr_2까지 거리
+gr_2_dist=np.sqrt((x1 - gr_2[0])**2 + (x2 - gr_2[1])**2)
+gr_2_dist
+
+# 그룹 할당
+labels = (gr_1_dist > gr_2_dist) + 1
+
+# 3) 그룹 중심점 업데이트
+# gr_1 중심점 업데이트
+gr_1[0] = x1[labels == 1].mean()
+gr_1[1] = x2[labels == 1].mean()
+
+# gr_2 중심점 업데이트
+gr_2[0] = x1[labels == 2].mean()
+gr_2[1] = x2[labels == 2].mean()
