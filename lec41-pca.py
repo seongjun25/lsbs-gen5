@@ -32,4 +32,25 @@ pca = PCA(n_components=3)
 pca_array = pca.fit_transform(scaled_data)
 my_pca = pd.DataFrame(pca_array,
                       index = scaled_data.index,
-                      columns=["pca1", "pca2", "pca3"])
+                      columns=["pc1", "pc2", "pc3"])
+my_pca.shape
+my_pca.corr()
+my_pca.cov()
+
+my_pca["pc1"].var(ddof=1)
+my_pca["pc2"].var(ddof=1)
+my_pca["pc3"].var(ddof=1)
+
+pca.explained_variance_.round(3)
+
+# 어떻게 PC들을 만들었나?
+# 1) 스케일된 데이터의 공분산행렬 계산
+# 2) 행렬 분해(아이겐벨류 디컴포지션) 적용
+#  => 아이겐벨류, 아이겐벡터 두개 결과값이 나옴
+scaled_data.cov(ddof=1)
+
+from numpy import linalg
+import numpy as np
+eig_values, eig_vectors = linalg.eig(scaled_data.cov(ddof=1))
+np.sqrt(eig_values[0] / eig_values[2])
+eig_vectors
