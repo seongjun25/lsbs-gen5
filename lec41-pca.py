@@ -41,7 +41,13 @@ my_pca["pc1"].var(ddof=1)
 my_pca["pc2"].var(ddof=1)
 my_pca["pc3"].var(ddof=1)
 
-pca.explained_variance_.round(3)
+pca.explained_variance_.round(3) # 아이겐베류
+x_to_pc = pd.DataFrame(
+    pca.components_,
+    columns=scaled_data.columns,
+    index=['pca1','pca2','pca3']).round(3)
+x_to_pc
+
 
 # 어떻게 PC들을 만들었나?
 # 1) 스케일된 데이터의 공분산행렬 계산
@@ -54,3 +60,45 @@ import numpy as np
 eig_values, eig_vectors = linalg.eig(scaled_data.cov(ddof=1))
 np.sqrt(eig_values[0] / eig_values[2])
 eig_vectors
+
+# PC1 = 0.548 * 부리길이 + 0.564 * 부리깊이 + 0.618 * 몸무게
+
+my_pca
+scaled_data.iloc[0,:]
+
+import matplotlib.pyplot as plt
+plt.bar(range(1, 4), pca.explained_variance_ratio_);
+plt.show()
+pca.explained_variance_ratio_[:2].sum()
+
+
+def biplot(score, coeff, pcax, pcay, labels=None):
+    pca1=pcax-1
+    pca2=pcay-1
+    xs = score[:,pca1]
+    ys = score[:,pca2]
+    n=score.shape[1]
+    scalex = 1.0/(xs.max()- xs.min())
+    scaley = 1.0/(ys.max()- ys.min())
+    plt.scatter(xs*scalex,ys*scaley)
+    
+    for i in range(n):
+        plt.arrow(0, 0, coeff[pca1, i], coeff[pca2, i],color='r',alpha=0.5)
+        if labels is None:
+            plt.text(coeff[pca1, i]* 1.15, coeff[pca2, i] * 1.15,
+            "Var"+str(i+1), color='g', ha='center', va='center')
+        else:
+            plt.text(coeff[pca1, i]* 1.15, coeff[pca2, i] * 1.15,
+            labels[i], color='g', ha='center', va='center')
+
+    plt.xlim(-1,1)
+    plt.ylim(-1,1)
+    plt.xlabel("PC 1")
+    plt.ylabel("PC 2")
+    plt.grid()
+
+biplot(pca_array, pca.components_, 1, 2, labels=scaled_data.columns)
+plt.show()
+
+
+x_to_pc
